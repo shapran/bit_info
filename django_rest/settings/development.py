@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'rest',
     'scraper',
     'authentific',
+    'react_app'
 ]
 
 MIDDLEWARE = [

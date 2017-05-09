@@ -20,6 +20,7 @@ from django.conf import settings
 from rest_framework import routers
 from rest import views
 from scraper.views import home_page
+from react_app.views import IndexPageView
 # from authentific.forms import LoginForm
 
 from authentific.views import user_login, user_register
@@ -40,6 +41,7 @@ urlpatterns = [
     url(r'^register/', user_register, name='register'),
     url(r'^api/v1/', include(router.urls)),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    url(r'^react_test/', IndexPageView.as_view(), name='rtest'),
     url(r'^$', home_page, name='home')
 ]
 
