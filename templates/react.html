@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <p class="text-right">
+    {% if user.is_authenticated %}
+        [:: You are currently logged in as <strong>{{ user.username }}</strong> .:]
+    {% else %}
+        [:: Welcome, guest .:]
+    {% endif %}
+    </p>
+    <div id="app"></div>
+    <script src="{% static "app.js" %}"></script>
+</div>
+{% endblock %}

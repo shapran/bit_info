@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <p class="text-right">
+    {% if user.is_authenticated %}
+        [:: You are currently logged in as <strong>{{ user.username }}</strong> .:]
+    {% else %}
+        [:: Welcome, guest .:]
+        <img src="{% static '/img/bender.jpg' %}" class="img-rounded" alt="Login to view content">
+    {% endif %}
+    </p>
+    {% if coins %}
+        <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Symbol</th>
+                <th>Market Cap</th>
+                <th>Price</th>
+                <th>Circulating Supply</th>
+                <th>Volume (24h)</th>
+                <th>1h, %</th>
+                <th>24h, %</th>
+                <th>7d, %</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for coin in coins %}
+              <tr>
+                <td>{{ coin.symbol.name }}</td>
+                <td>{{ coin.symbol.symbol }}</td>
+                <td>{{ coin.market_cap }}</td>
+                <td>{{ coin.price }}</td>
+                <td>{{ coin.supply }}</td>
+                <td>{{ coin.volume }}</td>
+                <td>{{ coin.hour_prc }}</td>
+                <td>{{ coin.day_prc }}</td>
+                <td>{{ coin.week_prc }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No data available :(</p>
+    {% endif %}
+</div>
+{% endblock %}
