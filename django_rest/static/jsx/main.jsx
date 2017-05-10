@@ -2,124 +2,81 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 var PropTypes = require('prop-types');
 
+import axios from 'axios';
 
-var dropDownOnChange = function(change) {
-        alert('onChangeForSelect:\noldValue: ' +
-                change.oldValue +
-                '\nnewValue: '
-                + change.newValue);
-};
 
+var Dropdown;
 var Dropdown = React.createClass({
 
-    propTypes: {
-        id: PropTypes.string.isRequired,
-        options: PropTypes.array.isRequired,
-        value: PropTypes.oneOfType(
-            [
-                PropTypes.number,
-                PropTypes.string
-            ]
-        ),
-        valueField: PropTypes.string,
-        labelField: PropTypes.string,
-        onChange: PropTypes.func
-    },
-
-    getDefaultProps: function() {
-        return {
-            value: null,
-            valueField: 'value',
-            labelField: 'label',
-            onChange: null
-        };
-    },
-
-    getInitialState: function() {
-        var selected = this.getSelectedFromProps(this.props);
-        return {
-            selected: selected
-        }
-    },
-
-    componentWillReceiveProps: function(nextProps) {
-        var selected = this.getSelectedFromProps(nextProps);
-        this.setState({
-           selected: selected
-        });
-    },
-
-    getSelectedFromProps(props) {
-        var selected;
-        if (props.value === null && props.options.length !== 0) {
-            selected = props.options[0][props.valueField];
-        } else {
-            selected = props.value;
-        }
-        return selected;
-    },
-
-    render: function() {
-        var self = this;
-        var options = self.props.options.map(function(option) {
-            return (
-                <option key={option[self.props.valueField]} value={option[self.props.valueField]}>
-                    {option[self.props.labelField]}
-                </option>
-            )
-        });
-        return (
-            <div className="col-xs-3">
-            <select id={this.props.id}
-                    className='form-control'
-                    value={this.state.selected}
-                    onChange={this.handleChange}>
-                {options}
-            </select>
-            </div>
-        )
-    },
-
-    handleChange: function(e) {
-        if (this.props.onChange) {
-            var change = {
-              oldValue: this.state.selected,
-              newValue: e.target.value
+  getCookie: function (name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(
+                    cookie.substring(name.length + 1)
+                );
+                break;
             }
-            this.props.onChange(change);
         }
-        this.setState({selected: e.target.value});
     }
+    return cookieValue;
+  },
 
+  getInitialState: function () {
+    return { info: [{name: 'bob', symbol: 'great'}] };
+  },
+
+  componentDidMount: function () {
+    var csrf_token = this.getCookie('csrftoken');
+
+        var config = {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': csrf_token
+            }
+        };
+
+        var base_url = 'http://127.0.0.1:8000/api/v1/symbols/?page=';
+        var data = [];
+        var total_pages = 1;
+
+        axios.get(base_url + total_pages, config).then(function (res) {
+            total_pages = res.data.total_pages;
+
+            var promises = [];
+            for (var i = 1; i <= 1; i++) {
+                promises.push(axios.get(base_url + i, config))
+            }
+            axios.all(promises).then(function (results) {
+                results.forEach(function (response) {
+                    // data.push.apply(data, response.data.results);
+                    data.push(response.data.results[0]);
+                })
+            });
+        });
+        console.log('data', data);
+        this.setState({info: data});
+    },
+
+  render: function() {
+
+    console.log('fet',this.state.info);
+    var symbols = this.state.info.map(function (symbol) {
+            console.log('inner',  symbol);
+    });
+
+    console.log(symbols);
+    return (
+      <select>{symbols}</select>
+    );
+  }
 });
 
-var options = [
-        {
-            description: 'This is option A',
-            code: 'a'
-        },
-        {
-            description: 'This is option B',
-            code: 'b'
-        },
-        {
-            description: 'This is option C',
-            code: 'c'
-        },
-        {
-            description: 'This is option D',
-            code: 'd'
-        }
-    ];
-
-
-
-// ReactDOM.render(<Dropdown list={colours} selected={colours[0]} />, document.getElementById("example"));
 ReactDOM.render(
-        <Dropdown id='myDropdown'
-                  options={options}
-                  value='b'
-                  labelField='description'
-                  valueField='code'
-                  onChange={dropDownOnChange}/>,
+        <Dropdown id='myDropdown'/>,
         document.getElementById('example'));
