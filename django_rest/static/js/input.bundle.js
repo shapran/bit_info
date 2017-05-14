@@ -11595,6 +11595,7 @@ var Dropdown = React.createClass({
     displayName: 'Dropdown',
 
 
+    // Get cookie data
     getCookie: function (name) {
         var cookieValue = null;
         if (document.cookie && document.cookie != '') {
@@ -11611,8 +11612,10 @@ var Dropdown = React.createClass({
         return cookieValue;
     },
 
+    // Fills select list and fetches last market data for all currencies
     getInitialState: function () {
-        return { info: [{ name: 'bob', symbol: 'great' }] };
+        return { info: [{ name: 'All', symbol: 'all_symbols' }],
+            table_data: [] };
     },
 
     componentDidMount: function () {
@@ -11626,45 +11629,266 @@ var Dropdown = React.createClass({
             }
         };
 
-        var base_url = 'http://127.0.0.1:8000/api/v1/symbols/?page=';
-        var data = [];
+        var base_url = 'http://127.0.0.1:8000/api/v1/simple/?page=';
+        var temp = [{ name: 'All', symbol: 'all_symbols' }];
         var total_pages = 1;
+        var _this = this;
 
         __WEBPACK_IMPORTED_MODULE_0_axios___default.a.get(base_url + total_pages, config).then(function (res) {
             total_pages = res.data.total_pages;
 
             var promises = [];
-            for (var i = 1; i <= 1; i++) {
+            for (var i = 1; i <= total_pages; i++) {
                 promises.push(__WEBPACK_IMPORTED_MODULE_0_axios___default.a.get(base_url + i, config));
             }
             __WEBPACK_IMPORTED_MODULE_0_axios___default.a.all(promises).then(function (results) {
                 results.forEach(function (response) {
-                    // data.push.apply(data, response.data.results);
-                    data.push(response.data.results[0]);
+                    var item = { name: "zzz", symbol: "qqq" };
+                    temp.push.apply(temp, response.data.results);
+                    _this.setState({ info: temp });
+                    _this.getLastData();
                 });
             });
+        }).catch(function (error) {
+            console.log('Data fetch error: ', error);
         });
-        console.log('data', data);
-        this.setState({ info: data });
+    },
+
+    // Fetch all market data related with chosen symbol
+    getSymbolData: function (symb) {
+        var csrf_token = this.getCookie('csrftoken');
+
+        var config = {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': csrf_token
+            }
+        };
+
+        var base_url = 'http://127.0.0.1:8000/api/v1/symbols/';
+        var t_data = [];
+        var _this = this;
+
+        __WEBPACK_IMPORTED_MODULE_0_axios___default.a.get(base_url + symb, config).then(function (res) {
+            var detail_pages = res.data.coins;
+
+            var promises = [];
+            for (var i = 1; i < detail_pages.length; i++) {
+                promises.push(__WEBPACK_IMPORTED_MODULE_0_axios___default.a.get(detail_pages[i], config));
+            }
+            __WEBPACK_IMPORTED_MODULE_0_axios___default.a.all(promises).then(function (results) {
+                results.forEach(function (response) {
+                    t_data.push(response.data);
+                    _this.setState({ table_data: t_data });
+                });
+            });
+        }).catch(function (error) {
+            console.log('Data fetch error: ', error);
+        });
+    },
+
+    // Get latest (filter by update_date field) market data
+    getLastData: function () {
+        var csrf_token = this.getCookie('csrftoken');
+
+        var config = {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': csrf_token
+            },
+            params: { all: 'true', page: 1 }
+        };
+
+        var base_url = 'http://127.0.0.1:8000/api/v1/coins/';
+        var temp = [{ name: 'All', symbol: 'all_symbols' }];
+        var total_pages = 1;
+        var _this = this;
+
+        __WEBPACK_IMPORTED_MODULE_0_axios___default.a.get(base_url, config).then(function (res) {
+            total_pages = res.data.count;
+
+            var promises = [];
+            for (var i = 1; i <= 1; i++) {
+                var config = {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-Token': csrf_token
+                    },
+                    params: { all: 'true', page_size: total_pages }
+                };
+                promises.push(__WEBPACK_IMPORTED_MODULE_0_axios___default.a.get(base_url, config));
+            }
+            __WEBPACK_IMPORTED_MODULE_0_axios___default.a.all(promises).then(function (results) {
+                results.forEach(function (response) {
+                    var item = { name: "zzz", symbol: "qqq" };
+                    temp.push.apply(temp, response.data.results);
+                    _this.setState({ table_data: temp });
+                });
+            });
+        }).catch(function (error) {
+            console.log('Data fetch error: ', error);
+        });
+    },
+
+    // Handle select switch option
+    handleChange(event) {
+        var symb = event.target.value.toUpperCase();
+        console.log(symb);
+        if (symb == "ALL_SYMBOLS") {
+            this.getLastData();
+        } else {
+            this.getSymbolData(symb);
+        }
     },
 
     render: function () {
 
-        console.log('fet', this.state.info);
         var symbols = this.state.info.map(function (symbol) {
-            console.log('inner', symbol);
+            return React.createElement(
+                'option',
+                { key: symbol.symbol + symbol.name, value: symbol.symbol },
+                symbol.name
+            );
         });
 
-        console.log(symbols);
+        var rows = this.state.table_data.map(function (row) {
+            return React.createElement(
+                'tr',
+                { key: row.id },
+                React.createElement(
+                    'td',
+                    null,
+                    row.name
+                ),
+                React.createElement(
+                    'td',
+                    null,
+                    row.symb
+                ),
+                React.createElement(
+                    'td',
+                    null,
+                    row.market_cap
+                ),
+                React.createElement(
+                    'td',
+                    null,
+                    row.price
+                ),
+                React.createElement(
+                    'td',
+                    null,
+                    row.supply
+                ),
+                React.createElement(
+                    'td',
+                    null,
+                    row.volume
+                ),
+                React.createElement(
+                    'td',
+                    null,
+                    row.hour_prc
+                ),
+                React.createElement(
+                    'td',
+                    null,
+                    row.day_prc
+                ),
+                React.createElement(
+                    'td',
+                    null,
+                    row.week_prc
+                )
+            );
+        });
+
         return React.createElement(
-            'select',
-            null,
-            symbols
+            'div',
+            { className: 'table_wrapper' },
+            React.createElement(
+                'div',
+                { className: 'select_block' },
+                React.createElement(
+                    'select',
+                    { onChange: this.handleChange },
+                    symbols
+                )
+            ),
+            React.createElement(
+                'div',
+                { className: 'table_block' },
+                React.createElement(
+                    'table',
+                    { className: 'table table-striped' },
+                    React.createElement(
+                        'thead',
+                        null,
+                        React.createElement(
+                            'tr',
+                            null,
+                            React.createElement(
+                                'th',
+                                null,
+                                'Name'
+                            ),
+                            React.createElement(
+                                'th',
+                                null,
+                                'Symbol'
+                            ),
+                            React.createElement(
+                                'th',
+                                null,
+                                'Market Cap'
+                            ),
+                            React.createElement(
+                                'th',
+                                null,
+                                'Price'
+                            ),
+                            React.createElement(
+                                'th',
+                                null,
+                                'Circulating Supply'
+                            ),
+                            React.createElement(
+                                'th',
+                                null,
+                                'Volume (24h)'
+                            ),
+                            React.createElement(
+                                'th',
+                                null,
+                                '1h, %'
+                            ),
+                            React.createElement(
+                                'th',
+                                null,
+                                '24h, %'
+                            ),
+                            React.createElement(
+                                'th',
+                                null,
+                                '7d, %'
+                            )
+                        )
+                    ),
+                    React.createElement(
+                        'tbody',
+                        null,
+                        rows
+                    )
+                )
+            )
         );
     }
 });
 
-ReactDOM.render(React.createElement(Dropdown, { id: 'myDropdown' }), document.getElementById('example'));
+ReactDOM.render(React.createElement(Dropdown, { id: 'dataFilter' }), document.getElementById('react_wrapper'));
 
 /***/ }),
 /* 110 */,

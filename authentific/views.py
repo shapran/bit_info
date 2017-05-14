@@ -9,9 +9,11 @@ def user_login(request, *args, **kwargs):
     if request.user.is_authenticated():
         return redirect('home')
     else:
+        form = LoginForm(request.POST or None)
         if request.method == 'POST':
-            return login(request, *args, **kwargs)
-        form = LoginForm()
+            if form.is_valid():
+                login(request, *args, **kwargs)
+                return redirect('home')
         return render(request, 'login.html', {'form':form})
 
 def user_register(request, *args, **kwargs):

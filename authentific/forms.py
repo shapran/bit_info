@@ -4,15 +4,30 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 from django import forms
 
-class LoginForm(AuthenticationForm):
+class LoginForm(forms.Form):
     username = forms.CharField(
+        required = True,
         label="Username",
         max_length=30,
         widget=forms.TextInput(attrs={'class': 'form-control', 'name': 'username', 'placeholder':'Username'}))
     password = forms.CharField(
+        required=True,
         label="Password",
         max_length=30,
         widget=forms.TextInput(attrs={'type':'password', 'class': 'form-control', 'name': 'password', 'placeholder':'Password'}))
+
+    def clean(self):
+        username = self.cleaned_data.get('username')
+        password = self.cleaned_data.get('password')
+        if username and password:
+            self.user_cache = authenticate(username=username, password=password)
+            if self.user_cache:
+                return self.cleaned_data
+            else:
+                del self.cleaned_data['password']
+                raise forms.ValidationError('User or password is incorrect.')
+
+        return self.cleaned_data
 
 class UserRegistrationForm(forms.Form):
     username = forms.CharField(
