@@ -10,9 +10,11 @@ colorama==0.3.9
 Django==1.11
 django-celery==3.2.1
 django-debug-toolbar==1.8
+django-redis==4.8.0
 djangorestframework==3.6.2
 gevent==1.2.1
 greenlet==0.4.12
+httpie==0.9.9
 kombu==3.0.37
 lxml==3.7.3
 multidict==2.1.4

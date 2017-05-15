@@ -3,6 +3,9 @@ var ReactDOM = require('react-dom');
 var PropTypes = require('prop-types');
 
 import axios from 'axios';
+import jquery from 'jquery';
+
+var jQuery = jquery;
 
 
 var Dropdown;
@@ -15,7 +18,6 @@ var Dropdown = React.createClass({
         var cookies = document.cookie.split(';');
         for (var i = 0; i < cookies.length; i++) {
             var cookie = jQuery.trim(cookies[i]);
-            // Does this cookie string begin with the name we want?
             if (cookie.substring(0, name.length + 1) == (name + '=')) {
                 cookieValue = decodeURIComponent(
                     cookie.substring(name.length + 1)
@@ -123,8 +125,8 @@ var Dropdown = React.createClass({
 
     axios.get(base_url, config).then(function (res) {
         total_pages = res.data.count;
-
         var promises = [];
+
         for (var i = 1; i <= 1; i++) {
             var config = {
                 headers: {
@@ -138,7 +140,7 @@ var Dropdown = React.createClass({
         }
         axios.all(promises).then(function (results) {
             results.forEach(function (response) {
-                var item = {name: "zzz", symbol: "qqq"};
+
                 temp.push.apply(temp, response.data.results);
                 _this.setState({table_data: temp});
             })

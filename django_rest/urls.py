@@ -32,7 +32,7 @@ router = routers.DefaultRouter()
 router.register(r'users', views.UserViewSet)
 router.register(r'groups', views.GroupViewSet)
 router.register(r'coins', views.CoinViewSet, base_name='coins')
-router.register(r'symbols', views.SymbolViewSet)
+router.register(r'symbols', views.SymbolViewSet, base_name='symbols')
 router.register(r'simple', views.SymbolsSimpleViewSet)
 
 # Wire up our API using automatic URL routing.
@@ -44,7 +44,6 @@ urlpatterns = [
     url(r'^logout/$', auth_views.logout, {'next_page': '/login'}, name='logout'),
     url(r'^register/', user_register, name='register'),
     url(r'^api/v1/', include(router.urls)),
-    # url(r'^api/v1/coins/$', views.CoinViewSet.as_view()),
     url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^react_test/', IndexPageView.as_view(), name='rtest'),
     url(r'^$', home_page, name='home')
