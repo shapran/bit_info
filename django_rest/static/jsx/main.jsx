@@ -29,9 +29,23 @@ var Dropdown = React.createClass({
     return cookieValue;
   },
 
+  numSort: function (obj, key) {
+      obj.sort(function(a,b) {
+          return b[key] - a[key];
+      });
+  },
+
+  alphaSort: function (obj, key) {
+      obj.sort(function(a,b) {
+          var x = a[key].toLowerCase();
+          var y = b[key].toLowerCase();
+          return x < y ? -1 : x > y ? 1 : 0;
+      });
+  },
+
   // Fills select list and fetches last market data for all currencies
   getInitialState: function () {
-    return { info: [{name: 'All', symbol: 'all_symbols'}],
+    return { info: [],
              table_data: []};
   },
 
@@ -47,7 +61,7 @@ var Dropdown = React.createClass({
         };
 
         var base_url = 'http://127.0.0.1:8000/api/v1/simple/?page=';
-        var temp = [{name: 'All', symbol: 'all_symbols'}];
+        var temp = [];
         var total_pages = 1;
         var _this = this;
 
@@ -119,7 +133,7 @@ var Dropdown = React.createClass({
     };
 
     var base_url = 'http://127.0.0.1:8000/api/v1/coins/';
-    var temp = [{name: 'All', symbol: 'all_symbols'}];
+    var temp = [];
     var total_pages = 1;
     var _this = this;
 
@@ -153,12 +167,36 @@ var Dropdown = React.createClass({
   // Handle select switch option
   handleChange(event) {
     var symb = event.target.value.toUpperCase();
-    console.log(symb);
     if (symb == "ALL_SYMBOLS")  {
         this.getLastData();
     } else  {
        this.getSymbolData(symb);
     }
+  },
+
+  handleSort(event) {
+      var indicator = event.target.id;
+      var temp = this.state.table_data.slice(0);
+      if (indicator == "srt_name") {
+          this.alphaSort(temp, 'name');
+      } else if (indicator == "srt_symbol") {
+          this.alphaSort(temp, 'symb');
+      } else if (indicator == "srt_market") {
+          this.numSort(temp, 'market_cap');
+      } else if (indicator == "srt_price") {
+          this.numSort(temp, 'price');
+      } else if (indicator == "srt_cs") {
+          this.numSort(temp, 'supply');
+      } else if (indicator == "srt_volume"){
+          this.numSort(temp, 'volume');
+      } else if (indicator == "srt_hour") {
+          this.numSort(temp, 'hour_prc');
+      } else if (indicator == "srt_day") {
+          this.numSort(temp, 'day_prc');
+      } else if (indicator == "srt_week") {
+          this.numSort(temp, 'week_prc');
+      }
+      this.setState({table_data: temp});
   },
 
   render: function() {
@@ -190,21 +228,24 @@ var Dropdown = React.createClass({
     return (
         <div className="table_wrapper">
             <div className="select_block">
-                <select onChange={this.handleChange}>{symbols}</select>
+                <select onChange={this.handleChange}>
+                    <option key="allsymb" value={'ALL_SYMBOLS'}>ALL</option>
+                    {symbols}
+                </select>
             </div>
             <div className="table_block">
             <table className="table table-striped">
                 <thead>
                   <tr>
-                    <th>Name</th>
-                    <th>Symbol</th>
-                    <th>Market Cap</th>
-                    <th>Price</th>
-                    <th>Circulating Supply</th>
-                    <th>Volume (24h)</th>
-                    <th>1h, %</th>
-                    <th>24h, %</th>
-                    <th>7d, %</th>
+                    <th><a id="srt_name" onClick={this.handleSort}>Name</a></th>
+                    <th><a id="srt_symbol" onClick={this.handleSort}>Symbol</a></th>
+                    <th><a id="srt_market" onClick={this.handleSort}>Market Cap</a></th>
+                    <th><a id="srt_price" onClick={this.handleSort}>Price</a></th>
+                    <th><a id="srt_cs" onClick={this.handleSort}>Circulating Supply</a></th>
+                    <th><a id="srt_volume" onClick={this.handleSort}>Volume (24h)</a></th>
+                    <th><a id="srt_hour" onClick={this.handleSort}>1h, %</a></th>
+                    <th><a id="srt_day" onClick={this.handleSort}>24h, %</a></th>
+                    <th><a id="srt_week" onClick={this.handleSort}>7d, %</a></th>
                   </tr>
                 </thead>
                 <tbody>

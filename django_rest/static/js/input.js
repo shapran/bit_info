@@ -21876,9 +21876,23 @@ var Dropdown = React.createClass({
         return cookieValue;
     },
 
+    numSort: function (obj, key) {
+        obj.sort(function (a, b) {
+            return b[key] - a[key];
+        });
+    },
+
+    alphaSort: function (obj, key) {
+        obj.sort(function (a, b) {
+            var x = a[key].toLowerCase();
+            var y = b[key].toLowerCase();
+            return x < y ? -1 : x > y ? 1 : 0;
+        });
+    },
+
     // Fills select list and fetches last market data for all currencies
     getInitialState: function () {
-        return { info: [{ name: 'All', symbol: 'all_symbols' }],
+        return { info: [],
             table_data: [] };
     },
 
@@ -21894,7 +21908,7 @@ var Dropdown = React.createClass({
         };
 
         var base_url = 'http://127.0.0.1:8000/api/v1/simple/?page=';
-        var temp = [{ name: 'All', symbol: 'all_symbols' }];
+        var temp = [];
         var total_pages = 1;
         var _this = this;
 
@@ -21966,7 +21980,7 @@ var Dropdown = React.createClass({
         };
 
         var base_url = 'http://127.0.0.1:8000/api/v1/coins/';
-        var temp = [{ name: 'All', symbol: 'all_symbols' }];
+        var temp = [];
         var total_pages = 1;
         var _this = this;
 
@@ -22006,6 +22020,31 @@ var Dropdown = React.createClass({
         } else {
             this.getSymbolData(symb);
         }
+    },
+
+    handleSort(event) {
+        var indicator = event.target.id;
+        var temp = this.state.table_data.slice(0);
+        if (indicator == "srt_name") {
+            this.alphaSort(temp, 'name');
+        } else if (indicator == "srt_symbol") {
+            this.alphaSort(temp, 'symb');
+        } else if (indicator == "srt_market") {
+            this.numSort(temp, 'market_cap');
+        } else if (indicator == "srt_price") {
+            this.numSort(temp, 'price');
+        } else if (indicator == "srt_cs") {
+            this.numSort(temp, 'supply');
+        } else if (indicator == "srt_volume") {
+            this.numSort(temp, 'volume');
+        } else if (indicator == "srt_hour") {
+            this.numSort(temp, 'hour_prc');
+        } else if (indicator == "srt_day") {
+            this.numSort(temp, 'day_prc');
+        } else if (indicator == "srt_week") {
+            this.numSort(temp, 'week_prc');
+        }
+        this.setState({ table_data: temp });
     },
 
     render: function () {
@@ -22079,6 +22118,11 @@ var Dropdown = React.createClass({
                 React.createElement(
                     'select',
                     { onChange: this.handleChange },
+                    React.createElement(
+                        'option',
+                        { key: 'allsymb', value: 'ALL_SYMBOLS' },
+                        'ALL'
+                    ),
                     symbols
                 )
             ),
@@ -22097,47 +22141,83 @@ var Dropdown = React.createClass({
                             React.createElement(
                                 'th',
                                 null,
-                                'Name'
+                                React.createElement(
+                                    'a',
+                                    { id: 'srt_name', onClick: this.handleSort },
+                                    'Name'
+                                )
                             ),
                             React.createElement(
                                 'th',
                                 null,
-                                'Symbol'
+                                React.createElement(
+                                    'a',
+                                    { id: 'srt_symbol', onClick: this.handleSort },
+                                    'Symbol'
+                                )
                             ),
                             React.createElement(
                                 'th',
                                 null,
-                                'Market Cap'
+                                React.createElement(
+                                    'a',
+                                    { id: 'srt_market', onClick: this.handleSort },
+                                    'Market Cap'
+                                )
                             ),
                             React.createElement(
                                 'th',
                                 null,
-                                'Price'
+                                React.createElement(
+                                    'a',
+                                    { id: 'srt_price', onClick: this.handleSort },
+                                    'Price'
+                                )
                             ),
                             React.createElement(
                                 'th',
                                 null,
-                                'Circulating Supply'
+                                React.createElement(
+                                    'a',
+                                    { id: 'srt_cs', onClick: this.handleSort },
+                                    'Circulating Supply'
+                                )
                             ),
                             React.createElement(
                                 'th',
                                 null,
-                                'Volume (24h)'
+                                React.createElement(
+                                    'a',
+                                    { id: 'srt_volume', onClick: this.handleSort },
+                                    'Volume (24h)'
+                                )
                             ),
                             React.createElement(
                                 'th',
                                 null,
-                                '1h, %'
+                                React.createElement(
+                                    'a',
+                                    { id: 'srt_hour', onClick: this.handleSort },
+                                    '1h, %'
+                                )
                             ),
                             React.createElement(
                                 'th',
                                 null,
-                                '24h, %'
+                                React.createElement(
+                                    'a',
+                                    { id: 'srt_day', onClick: this.handleSort },
+                                    '24h, %'
+                                )
                             ),
                             React.createElement(
                                 'th',
                                 null,
-                                '7d, %'
+                                React.createElement(
+                                    'a',
+                                    { id: 'srt_week', onClick: this.handleSort },
+                                    '7d, %'
+                                )
                             )
                         )
                     ),
