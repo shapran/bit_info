@@ -21876,9 +21876,9 @@ var Dropdown = React.createClass({
         return cookieValue;
     },
 
-    numSort: function (obj, key) {
+    numSort: function (obj, key, desc = true) {
         obj.sort(function (a, b) {
-            return b[key] - a[key];
+            return desc ? b[key] - a[key] : !desc ? a[key] - b[key] : b[key] - a[key];
         });
     },
 
@@ -21893,7 +21893,8 @@ var Dropdown = React.createClass({
     // Fills select list and fetches last market data for all currencies
     getInitialState: function () {
         return { info: [],
-            table_data: [] };
+            table_data: []
+        };
     },
 
     componentDidMount: function () {
@@ -22014,7 +22015,6 @@ var Dropdown = React.createClass({
     // Handle select switch option
     handleChange(event) {
         var symb = event.target.value.toUpperCase();
-        console.log(symb);
         if (symb == "ALL_SYMBOLS") {
             this.getLastData();
         } else {
@@ -22025,8 +22025,11 @@ var Dropdown = React.createClass({
     handleSort(event) {
         var indicator = event.target.id;
         var temp = this.state.table_data.slice(0);
+
         if (indicator == "srt_name") {
             this.alphaSort(temp, 'name');
+            $(event.target.parentElement).addClass('sorting_desc');
+            $(event.target).addClass('sorting_by');
         } else if (indicator == "srt_symbol") {
             this.alphaSort(temp, 'symb');
         } else if (indicator == "srt_market") {

@@ -2,8 +2,6 @@ import asyncio
 import aiohttp
 from lxml import html
 import re
-import datetime
-
 pattern_price = re.compile(r'([\d.,]+)')
 pattern_percent = re.compile(r'([\d.,-]+)')
 
