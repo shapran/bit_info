@@ -2,8 +2,7 @@ var path = require("path");
 
 module.exports = {
     entry: {
-        input: "./django_rest/static/jsx/main.jsx",
-        // table: "./django_rest/static/jsx/table_handler.jsx"
+        input: "./django_rest/static/jsx/main.jsx"
     },
     output: {
         path: path.join(__dirname, "./django_rest/static/js"),
